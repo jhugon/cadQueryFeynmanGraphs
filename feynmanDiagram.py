@@ -73,7 +73,7 @@ def makeLine(wp,endPoint,arrow=False,forward=True,width=0.25):
 # These parameters can be manipulated by end users
 #
 propagatorLength = FloatParam(min=1.0,max=100.0,presets={'default':50.0},group="Size", desc="Length of the propagator line")
-externalLength = FloatParam(min=1.0,max=100.0,presets={'default':5.0},group="Size", desc="Length of the external legs")
+externalLength = FloatParam(min=1.0,max=100.0,presets={'default':30.0},group="Size", desc="Length of the external legs")
 bosonWidth = FloatParam(min=0.5,max=10.0,presets={'default':2.0},group="Size", desc="Width of the Boson lines")
 fermionWidth = FloatParam(min=0.5,max=10.0,presets={'default':2.0},group="Size", desc="Width of the Fermion lines")
 arrowWidth = FloatParam(min=0.5,max=20.0,presets={'default':4.0},group="Size", desc="Width of the arrows on Fermion lines")
@@ -101,18 +101,21 @@ def build():
     circleLWorld = circleL.faces(">Z").workplane(offset=-depth)
     circleRWorld = circleR.faces(">Z").workplane(offset=-depth)
     
-    propagator = makeWiggle(circleLWorld,(propagatorLength.value,0.),width=bosonWidth.value).extrude(depth)
+#    propagator = makeWiggle(circleLWorld,(propagatorLength.value,0.),width=bosonWidth.value).extrude(depth)
+    propagator = makeLine(circleLWorld,(propagatorLength.value,0.),width=bosonWidth.value).extrude(depth)
+
     
-#    ulExt = makeLine(circleLWorld,(-externalLenX,externalLenY),width=fermionWidth.value).extrude(depth)
-    
-    #world = makeWiggle(world,(0,6)).extrude(depth).faces(">Z").workplane(offset=-depth)
-    #world = world.rect(2,2).extrude(depth).faces(">Z").workplane(offset=-depth)
-    #world = makeWiggle(world,(6,0)).extrude(depth).faces(">Z").workplane(offset=-depth)
-    #result = makeLine(world,(-4.2,-4.2)).extrude(depth)
+    ulExt = makeLine(circleLWorld,(-externalLenX,externalLenY),width=fermionWidth.value).extrude(depth)
+    llExt = makeLine(circleLWorld,(-externalLenX,-externalLenY),width=fermionWidth.value).extrude(depth)
+    urExt = makeLine(circleLWorld,(externalLenX,externalLenY),width=fermionWidth.value).extrude(depth)
+    lrExt = makeLine(circleLWorld,(externalLenX,-externalLenY),width=fermionWidth.value).extrude(depth)
+
     result = propagator
     result = result.union(circleL)
     result = result.union(circleR)
-#    result = result.union(ulExt)
-    #result = result.union(circleR)
+    result = result.union(ulExt)
+    result = result.union(llExt)
+    result = result.union(urExt)
+    result = result.union(lrExt)
     return result
 
