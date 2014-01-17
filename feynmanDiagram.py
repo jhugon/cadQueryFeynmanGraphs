@@ -81,6 +81,12 @@ arrowLength = FloatParam(min=1.0,max=20.0,presets={'default':10.0},group="Size",
 thickness = FloatParam(min=0.5,max=20.0,presets={'default':3.0},group="Size", desc="Thickness of the feynman diagram model")
 vertexDiameter = FloatParam(min=1.0,max=20.0,presets={'default':3.0},group="Size", desc="Diameter of the vertex circles")
 
+propagatorIsBoson = BooleanParam(presets={'default':True},group="Diagram Configuration", desc="If True, the propagator will be represented as a boson line, if False it will be represented as a Fermion line")
+upperLeftExternalIsBoson = BooleanParam(presets={'default':False},group="Diagram Configuration", desc="If True, the upper left external line will be represented as a boson line, if False it will be represented as a Fermion line")
+upperRightExternalIsBoson = BooleanParam(presets={'default':False},group="Diagram Configuration", desc="If True, the upper right external line will be represented as a boson line, if False it will be represented as a Fermion line")
+lowerLeftExternalIsBoson = BooleanParam(presets={'default':False},group="Diagram Configuration", desc="If True, the lower left external line will be represented as a boson line, if False it will be represented as a Fermion line")
+lowerRightExternalIsBoson = BooleanParam(presets={'default':False},group="Diagram Configuration", desc="If True, the lower right external line will be represented as a boson line, if False it will be represented as a Fermion line")
+
 #
 # Other Variables.
 # These are used in the script but not exposed to users to change with the GUI
@@ -100,18 +106,40 @@ def build():
     circleR = world.pushPoints([(propagatorLength.value/2.,0)]).circle(vertexDiameter.value).extrude(depth)
     circleLWorld = circleL.faces(">Z").workplane(offset=-depth)
     circleRWorld = circleR.faces(">Z").workplane(offset=-depth)
-    
-#    propagator = makeWiggle(circleLWorld,(propagatorLength.value,0.),width=bosonWidth.value).extrude(depth)
-    propagator = makeLine(circleLWorld,(propagatorLength.value,0.),width=bosonWidth.value).extrude(depth)
 
+    propagator = None
+    ulExt = None
+    llExt = None
+    urExt = None
+    lrExt = None
     
-    ulExt = makeLine(circleLWorld,(-externalLenX,externalLenY),width=fermionWidth.value).extrude(depth)
-    llExt = makeLine(circleLWorld,(-externalLenX,-externalLenY),width=fermionWidth.value).extrude(depth)
-    urExt = makeLine(circleLWorld,(externalLenX,externalLenY),width=fermionWidth.value).extrude(depth)
-    lrExt = makeLine(circleLWorld,(externalLenX,-externalLenY),width=fermionWidth.value).extrude(depth)
+    if propagatorIsBoson.value:
+      propagator = makeWiggle(circleLWorld,(propagatorLength.value,0.),width=bosonWidth.value).extrude(depth)
+    else:
+      propagator = makeLine(circleLWorld,(propagatorLength.value,0.),width=fermionWidth.value).extrude(depth)
+    
+    if upperLeftExternalIsBoson.value:
+      ulExt = makeWiggle(circleLWorld,(-externalLenX,externalLenY),width=bosonWidth.value).extrude(depth)
+    else:
+      ulExt = makeLine(circleLWorld,(-externalLenX,externalLenY),width=fermionWidth.value).extrude(depth)
 
-    result = propagator
-    result = result.union(circleL)
+    if lowerLeftExternalIsBoson.value:
+      llExt = makeWiggle(circleLWorld,(-externalLenX,-externalLenY),width=bosonWidth.value).extrude(depth)
+    else:
+      llExt = makeLine(circleLWorld,(-externalLenX,-externalLenY),width=fermionWidth.value).extrude(depth)
+
+    if upperRightExternalIsBoson.value:
+      urExt = makeWiggle(circleRWorld,(externalLenX,externalLenY),width=bosonWidth.value).extrude(depth)
+    else:
+      urExt = makeLine(circleRWorld,(externalLenX,externalLenY),width=fermionWidth.value).extrude(depth)
+
+    if lowerRightExternalIsBoson.value:
+      lrExt = makeWiggle(circleRWorld,(externalLenX,-externalLenY),width=bosonWidth.value).extrude(depth)
+    else:
+      lrExt = makeLine(circleRWorld,(externalLenX,-externalLenY),width=fermionWidth.value).extrude(depth)
+
+    result = circleL
+    result = result.union(propagator)
     result = result.union(circleR)
     result = result.union(ulExt)
     result = result.union(llExt)
