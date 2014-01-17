@@ -209,8 +209,8 @@ if __name__ == "__main__":
   f = open("output.stl",'w')
   f.write(stlStr)
   f.close()
-  stepStr = exporters.toString(result,"STEP")
-  f = open("output.step",'w')
-  f.write(stepStr)
-  f.close()
+  #stepStr = exporters.toString(result,"STEP")
+  #f = open("output.step",'w')
+  #f.write(stepStr)
+  #f.close()
   

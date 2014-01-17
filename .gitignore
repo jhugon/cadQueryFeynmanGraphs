@@ -1,3 +1,8 @@
+*.step
+*.stl
+
+#########################
+
 *.py[cod]
 
 # C extensions
