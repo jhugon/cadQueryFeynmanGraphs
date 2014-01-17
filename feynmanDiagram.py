@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+
+if __name__ == "__main__":
+  import sys
+  sys.path.append("/tmp/silly/")
+  sys.path.append("/tmp/silly/FreeCAD")
+  from cadquery import *
+  import math
 #
 # Important MetaData
 #
@@ -56,8 +64,8 @@ def makeWiggle(wp,endPoint,wigglePeriod=5.0,amplitude=2,width=0.25):
         currentPointM1 = addVectors2d(addVectors2d(currentPoint,advanceVector),scaleVector2d(ampVector,0.3))
         currentPoint = addVectors2d(addVectors2d(currentPointM1,advanceVector),scaleVector2d(ampVector,0.7))
         wp = wp.threePointArc(currentPointM1,currentPoint)
-    currentPoint = scaleVector2d(perpVector,-width/2.)
-    wp = wp.lineTo(currentPoint[0],currentPoint[1])
+    #currentPoint = scaleVector2d(perpVector,-width/2.)
+    #wp = wp.lineTo(currentPoint[0],currentPoint[1])
     wp = wp.close()
     return wp
     
@@ -76,20 +84,63 @@ def makeLine(wp,endPoint,arrow=False,forward=True,width=0.25):
 # PARAMETERS and PRESETS
 # These parameters can be manipulated by end users
 #
-propagatorLength = FloatParam(min=1.0,max=100.0,presets={'default':50.0},group="Size", desc="Length of the propagator line")
-externalLength = FloatParam(min=1.0,max=100.0,presets={'default':30.0},group="Size", desc="Length of the external legs")
-bosonWidth = FloatParam(min=0.5,max=10.0,presets={'default':2.0},group="Size", desc="Width of the Boson lines")
-fermionWidth = FloatParam(min=0.5,max=10.0,presets={'default':2.0},group="Size", desc="Width of the Fermion lines")
-arrowWidth = FloatParam(min=0.5,max=20.0,presets={'default':4.0},group="Size", desc="Width of the arrows on Fermion lines")
-arrowLength = FloatParam(min=1.0,max=20.0,presets={'default':10.0},group="Size", desc="Length of the arrows on Fermion lines")
-thickness = FloatParam(min=0.5,max=20.0,presets={'default':3.0},group="Size", desc="Thickness of the feynman diagram model")
-vertexDiameter = FloatParam(min=1.0,max=20.0,presets={'default':3.0},group="Size", desc="Diameter of the vertex circles")
+class Silly(object):
+  def __init__(self,val):
+      self.value = val
+propagatorLength  = Silly(50.0)
+externalLength  = Silly(30.0)
+bosonWidth  = Silly(2.0)
+fermionWidth  = Silly(2.0)
+arrowWidth  = Silly(4.0)
+arrowLength  = Silly(10.0)
+thickness  = Silly(3.0)
+vertexDiameter  = Silly(3.0)
 
-propagatorIsBoson = BooleanParam(presets={'default':True},group="Diagram Configuration", desc="If True, the propagator will be represented as a boson line, if False it will be represented as a Fermion line")
-upperLeftExternalIsBoson = BooleanParam(presets={'default':False},group="Diagram Configuration", desc="If True, the upper left external line will be represented as a boson line, if False it will be represented as a Fermion line")
-upperRightExternalIsBoson = BooleanParam(presets={'default':False},group="Diagram Configuration", desc="If True, the upper right external line will be represented as a boson line, if False it will be represented as a Fermion line")
-lowerLeftExternalIsBoson = BooleanParam(presets={'default':False},group="Diagram Configuration", desc="If True, the lower left external line will be represented as a boson line, if False it will be represented as a Fermion line")
-lowerRightExternalIsBoson = BooleanParam(presets={'default':False},group="Diagram Configuration", desc="If True, the lower right external line will be represented as a boson line, if False it will be represented as a Fermion line")
+propagatorIsBoson  = Silly(True)
+upperLeftExternalIsBoson  = Silly(False)
+upperRightExternalIsBoson  = Silly(False)
+lowerLeftExternalIsBoson  = Silly(False)
+lowerRightExternalIsBoson  = Silly(False)
+
+if __name__ != "__main__":
+  propagatorLength = FloatParam(min=1.0,max=100.0,
+                        presets={'default':50.0},group="Size", 
+                        desc="Length of the propagator line"
+                     )
+  externalLength = FloatParam(min=1.0,max=100.0,
+                        presets={'default':30.0},group="Size", 
+                        desc="Length of the external legs"
+                    )
+  bosonWidth = FloatParam(min=0.5,max=10.0,
+                        presets={'default':2.0},group="Size", 
+                    desc="Width of the Boson lines"
+                    )
+  fermionWidth = FloatParam(min=0.5,max=10.0,
+                            presets={'default':2.0},group="Size", 
+                    desc="Width of the Fermion lines"
+                    )
+  arrowWidth = FloatParam(min=0.5,max=20.0,presets={'default':4.0},
+                        group="Size", 
+                        desc="Width of the arrows on Fermion lines"
+                    )
+  arrowLength = FloatParam(min=1.0,max=20.0,
+                        presets={'default':10.0},group="Size", 
+                        desc="Length of the arrows on Fermion lines"
+                    )
+  thickness = FloatParam(min=0.5,max=20.0,
+                        presets={'default':3.0},group="Size", 
+                        desc="Thickness of the feynman diagram model"
+                    )
+  vertexDiameter = FloatParam(min=1.0,max=20.0,
+                        presets={'default':3.0},group="Size", 
+                        desc="Diameter of the vertex circles"
+                    )
+  
+  propagatorIsBoson = BooleanParam(presets={'default':True},group="Diagram Configuration", desc="If True, the propagator will be represented as a boson line, if False it will be represented as a Fermion line")
+  upperLeftExternalIsBoson = BooleanParam(presets={'default':False},group="Diagram Configuration", desc="If True, the upper left external line will be represented as a boson line, if False it will be represented as a Fermion line")
+  upperRightExternalIsBoson = BooleanParam(presets={'default':False},group="Diagram Configuration", desc="If True, the upper right external line will be represented as a boson line, if False it will be represented as a Fermion line")
+  lowerLeftExternalIsBoson = BooleanParam(presets={'default':False},group="Diagram Configuration", desc="If True, the lower left external line will be represented as a boson line, if False it will be represented as a Fermion line")
+  lowerRightExternalIsBoson = BooleanParam(presets={'default':False},group="Diagram Configuration", desc="If True, the lower right external line will be represented as a boson line, if False it will be represented as a Fermion line")
 
 #
 # Other Variables.
@@ -149,5 +200,17 @@ def build():
     result = result.union(llExt)
     result = result.union(urExt)
     result = result.union(lrExt)
+    print "Did everything"
     return result
 
+if __name__ == "__main__":
+  result = build()
+  stlStr = exporters.toString(result,"STL")
+  f = open("output.stl",'w')
+  f.write(stlStr)
+  f.close()
+  stepStr = exporters.toString(result,"STEP")
+  f = open("output.step",'w')
+  f.write(stepStr)
+  f.close()
+  
