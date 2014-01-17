@@ -1,11 +1,9 @@
-
 #
 # Important MetaData
 #
 UOM = "mm"
 
-def sqrt(x):
-    return x**(0.5)
+sqrt = math.sqrt
 def distance2d(p1,p2):
     return sqrt((p1[1]-p2[1])**2+(p1[0]-p2[0])**2)
 def getVector2d(p1,p2):
@@ -19,7 +17,7 @@ def scaleVector2d(p,sf):
 def addVectors2d(p1,p2):
     return (p1[0]+p2[0],p1[1]+p2[1])
 
-def makeWiggle(wp,endPoint,wigglePeriod=1.0,amplitude=0.25,width=0.25):
+def makeWiggle(wp,endPoint,wigglePeriod=5.0,amplitude=2,width=0.25):
     firstLine = []
     secondLine = []
     currentPoint = (0,0)
@@ -74,7 +72,7 @@ def makeLine(wp,endPoint,arrow=False,forward=True,width=0.25):
 # PARAMETERS and PRESETS
 # These parameters can be manipulated by end users
 #
-propagatorLength = FloatParam(min=1.0,max=100.0,presets={'default':5.0},group="Size", desc="Length of the propagator line")
+propagatorLength = FloatParam(min=1.0,max=100.0,presets={'default':50.0},group="Size", desc="Length of the propagator line")
 externalLength = FloatParam(min=1.0,max=100.0,presets={'default':5.0},group="Size", desc="Length of the external legs")
 bosonWidth = FloatParam(min=0.5,max=10.0,presets={'default':2.0},group="Size", desc="Width of the Boson lines")
 fermionWidth = FloatParam(min=0.5,max=10.0,presets={'default':2.0},group="Size", desc="Width of the Fermion lines")
@@ -87,14 +85,34 @@ vertexDiameter = FloatParam(min=1.0,max=20.0,presets={'default':3.0},group="Size
 # Other Variables.
 # These are used in the script but not exposed to users to change with the GUI
 
+externalAngle = 45.
+externalAngleRad = externalAngle*math.pi/180.
+externalLenX = abs(externalLength.value*math.cos(externalAngleRad))
+externalLenY = abs(externalLength.value*math.sin(externalAngleRad))
+
 #
 # Your build method. It must return a solid object
 #
 def build():
-    depth = 0.5
+    depth = thickness.value
     world = Workplane(Plane.XY())
-    world = makeWiggle(world,(0,6)).extrude(depth).faces(">Z").workplane(offset=-depth)
-    world = world.rect(2,2).extrude(depth).faces(">Z").workplane(offset=-depth)
-    world = makeWiggle(world,(6,0)).extrude(depth).faces(">Z").workplane(offset=-depth)
-    result = makeLine(world,(-4.2,-4.2)).extrude(depth)
+    circleL = world.pushPoints([(-propagatorLength.value/2.,0)]).circle(vertexDiameter.value).extrude(depth)
+    circleR = world.pushPoints([(propagatorLength.value/2.,0)]).circle(vertexDiameter.value).extrude(depth)
+    circleLWorld = circleL.faces(">Z").workplane(offset=-depth)
+    circleRWorld = circleR.faces(">Z").workplane(offset=-depth)
+    
+    propagator = makeWiggle(circleLWorld,(propagatorLength.value,0.),width=bosonWidth.value).extrude(depth)
+    
+#    ulExt = makeLine(circleLWorld,(-externalLenX,externalLenY),width=fermionWidth.value).extrude(depth)
+    
+    #world = makeWiggle(world,(0,6)).extrude(depth).faces(">Z").workplane(offset=-depth)
+    #world = world.rect(2,2).extrude(depth).faces(">Z").workplane(offset=-depth)
+    #world = makeWiggle(world,(6,0)).extrude(depth).faces(">Z").workplane(offset=-depth)
+    #result = makeLine(world,(-4.2,-4.2)).extrude(depth)
+    result = propagator
+    result = result.union(circleL)
+    result = result.union(circleR)
+#    result = result.union(ulExt)
+    #result = result.union(circleR)
     return result
+
