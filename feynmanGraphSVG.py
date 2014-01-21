@@ -108,35 +108,34 @@ def spiralLine(path,p1,p2,capped1=True,capped2=True,amp=25.0,period=25.0,width=5
   #print "distance: ",distance
   #print "nLoops: ",nLoops
   #print "period: ",period
-  width *= 2
   path.push(['M']+list(p1))
   if capped1:
-    path.push(['l']+list(normedPerpVec*width/4.))
+    path.push(['l']+list(normedPerpVec*width/2.))
   else:
-    path.push(['m']+list(normedPerpVec*width/4.))
+    path.push(['m']+list(normedPerpVec*width/2.))
   for iCrossings in range(nLoops):
     path.push(['q']+list(propVec/2+ampVec/4.)+list(propVec))
   if capped2:
-    path.push(['l']+list(-normedPerpVec*width/2.))
+    path.push(['l']+list(-normedPerpVec*width))
   else:
-    path.push(['m']+list(-normedPerpVec*width/2.))
+    path.push(['m']+list(-normedPerpVec*width))
   propVec *= -1
-  path.push(['l']+list(-(width/2.)*normedPropVec))
+  path.push(['l']+list(-(width)*normedPropVec))
   for iCrossings in range(nLoops):
-    path.push(['q']+list(-0.5*(loopDistance-width)*normedPropVec+ampVec/4.)+list(-(loopDistance-width)*normedPropVec))
+    path.push(['q']+list(-0.5*(loopDistance-2*width)*normedPropVec+ampVec/4.)+list(-(loopDistance-2*width)*normedPropVec))
     if iCrossings != nLoops-1:
-      path.push(['c']+list(normedPropVec*width-0.5*ampVec)+list(normedPropVec*width-ampVec)+list(-0.5*normedPropVec*width-ampVec))
-      path.push(['c']+list(-1.5*normedPropVec*width)+list(-1.5*normedPropVec*width+0.5*ampVec)+list(-0.5*normedPropVec*width+ampVec))
-      path.push(['m']+list(normedPropVec*width/2.-normedPerpVec*width/2.))
-      path.push(['c']+list(normedPropVec*width-0.5*((amp-width)*normedPerpVec))+list(0.5*normedPropVec*width-((amp-width)*normedPerpVec))+list(-(amp-width)*normedPerpVec))
-      path.push(['m']+list((amp-width)*normedPerpVec))
-      path.push(['c']+list(-normedPropVec*width-0.5*((amp-width)*normedPerpVec))+list(-0.5*normedPropVec*width-((amp-width)*normedPerpVec))+list(-(amp-width)*normedPerpVec))
-      path.push(['m']+list(-normedPropVec*width/2.+normedPerpVec*width/2.+(amp-width)*normedPerpVec))
-  path.push(['l']+list(-(width/2.)*normedPropVec))
+      path.push(['c']+list(2*normedPropVec*width-0.5*ampVec)+list(2*normedPropVec*width-ampVec)+list(-normedPropVec*width-ampVec))
+      path.push(['c']+list(-3*normedPropVec*width)+list(-3*normedPropVec*width+0.5*ampVec)+list(-normedPropVec*width+ampVec))
+      path.push(['m']+list(normedPropVec*width-normedPerpVec*width))
+      path.push(['c']+list(2*normedPropVec*width-0.5*((amp-2*width)*normedPerpVec))+list(normedPropVec*width-((amp-2*width)*normedPerpVec))+list(-(amp-2*width)*normedPerpVec))
+      path.push(['m']+list((amp-2*width)*normedPerpVec))
+      path.push(['c']+list(-2*normedPropVec*width-0.5*((amp-2*width)*normedPerpVec))+list(-normedPropVec*width-((amp-2*width)*normedPerpVec))+list(-(amp-2*width)*normedPerpVec))
+      path.push(['m']+list(-normedPropVec*width+normedPerpVec*width+(amp-2*width)*normedPerpVec))
+  path.push(['l']+list(-width*normedPropVec))
   if capped1:
-    path.push(['l']+list(normedPerpVec*width/4.))
+    path.push(['l']+list(normedPerpVec*width/2.))
   else:
-    path.push(['m']+list(normedPerpVec*width/4.))
+    path.push(['m']+list(normedPerpVec*width/2.))
   return makeEndPoints(p1,p2,width)
 
 def straightLine(path,p1,p2,capped1=True,capped2=True,width=5.0):
@@ -227,89 +226,171 @@ def vertexCircle(path,p1,endList,radius=5.):
   for end in thisVertexEnds:
     vec0 = end[0]-p1
     vec1 = end[1]-p1
+    vecCenter = vec1+vec0
+    angleCenter = numpy.arctan2(vecCenter[1],vecCenter[0])
     #print vec0
     #print vec1
-    angle0 =  numpy.arctan2(*list(vec0))
-    angle1 =  numpy.arctan2(*list(vec1))
-    #angleSwept  = numpy.arctan2(*list(vec1))-numpy.arctan2(*list(vec0))
-    #print angleSwept
-    #sweepFlag = 1
-    #if angleSwept < 0.:
-    #  sweepFlag = 0
-    #path.push(['M']+list(end[0]))
-    #largeArc = 1
-    #path.push(['A']+[newRad,newRad,0,largeArc,sweepFlag]+list(end[1]))
+    angle0 =  numpy.arctan2(vec0[1],vec0[0])
+    angle1 =  numpy.arctan2(vec1[1],vec1[0])
+    crossesBoundary = abs(angle0)<numpy.pi/2.
+    crossesBoundary = crossesBoundary and angle0/abs(angle0) != angle1/abs(angle1)
+    if angle0 < 0.:
+      angle0 += 2*numpy.pi
+    if angle1 < 0.:
+      angle1 += 2*numpy.pi
+    if angleCenter < 0.:
+      angleCenter += 2*numpy.pi
     firstAngle = angle0
     secondAngle = angle1
     firstPoint = end[0]
     secondPoint = end[1]
     advanceAngle = secondAngle-firstAngle
-    if advanceAngle > numpy.pi and  advanceAngle < 2*numpy.pi:
-      advanceAngle -= 2*numpy.pi
-    if advanceAngle < -numpy.pi and  advanceAngle > -2*numpy.pi:
-      advanceAngle += 2*numpy.pi
-    if advanceAngle<0.:
+    if (advanceAngle<0. and advanceAngle> -1.5*numpy.pi) or advanceAngle> 1.5*numpy.pi:
       firstAngle = angle1
       secondAngle = angle0
       firstPoint = end[1]
       secondPoint = end[0]
-    dataDict = {'first':firstPoint,'second':secondPoint,'firstAngle':firstAngle,'secondAngle':secondAngle}
+    dataDict = {'first':firstPoint,'second':secondPoint,'firstAngle':firstAngle,'secondAngle':secondAngle,'crossesBoundary':crossesBoundary,'angleCenter':angleCenter}
     endsList.append(dataDict)
-  endsList.sort(key=lambda x: x['firstAngle'])
-  #print "******************"
-  #for i,end in enumerate(endsList):
-  #  print i
-  #  print end
-  #print "###################"
+  endsList.sort(key=lambda x: x['angleCenter'])
+  print "******************"
+  print "circle coords: ",p1
   for i,end in enumerate(endsList):
-    #print list(endsList[i-1]['second'])
-    #print list(end['first'])
+    print i
+    print end
+  print "###################"
+  #path.push(['M']+list(p1))
+  #path.push(['l']+[newRad,0.])
+  #path.push(['M']+list(p1))
+  #path.push(['l']+[0.,newRad])
+  for i,end in enumerate(endsList):
+    #if i != 0:
+    #    continue
+    print list(endsList[i-1]['second'])
+    print list(end['first'])
     path.push(['M']+list(endsList[i-1]['second']))
     advanceAngle = end['firstAngle'] - endsList[i-1]['secondAngle']
-    #print end['firstAngle']*180/numpy.pi , endsList[i-1]['secondAngle']*180/numpy.pi
-    #print advanceAngle*180/numpy.pi
-    sweepFlag = 1
-    if advanceAngle < 0.:
-      sweepFlag = 0
-    sweepFlag = 0
-    if advanceAngle > numpy.pi and  advanceAngle < 2*numpy.pi:
-      advanceAngle -= 2*numpy.pi
-    if advanceAngle < -numpy.pi and  advanceAngle > -2*numpy.pi:
-      advanceAngle += 2*numpy.pi
-    largeArc = 1
-    if abs(advanceAngle) < numpy.pi:
+    print end['firstAngle']*180/numpy.pi , endsList[i-1]['secondAngle']*180/numpy.pi
+    print advanceAngle*180/numpy.pi
+    isSame = endsList[i] is endsList[i-1]
+    print "isSame: ",isSame
+    sweepFlag = None
+    largeArc = None
+    if advanceAngle <= 0 and abs(advanceAngle) > numpy.pi:
+      sweepFlag = 1
       largeArc = 0
-    #print advanceAngle*180/numpy.pi
-    #print sweepFlag,largeArc
+      if isSame:
+        sweepFlag = 0
+        largeArc = 1
+      elif end['crossesBoundary']:
+        sweepFlag = 1
+        largeArc = 1
+    elif advanceAngle > 0 and abs(advanceAngle) > numpy.pi:
+      sweepFlag = 1
+      largeArc = 0
+      if isSame:
+        sweepFlag = 1
+        largeArc = 1
+    elif advanceAngle <= 0 and abs(advanceAngle) <= numpy.pi:
+      sweepFlag = 1
+      largeArc = 1
+    elif advanceAngle > 0 and abs(advanceAngle) <= numpy.pi:
+      sweepFlag = 1
+      largeArc = 0
+    print sweepFlag,largeArc
     path.push(['A']+[newRad,newRad,0,largeArc,sweepFlag]+list(end['first']))
 
+#dwg = svgwrite.Drawing('test.svg',size=("181mm","181mm"),viewBox="0 0 181 181")
+#dwg = svgwrite.Drawing('test.svg',size=("384mm","384mm"),viewBox="0 0 384 384")
+#dwg = svgwrite.Drawing('test.svg',size=("790mm","384mm"),viewBox="0 0 790 384")
 color = svgwrite.rgb(0, 0, 255) # for cutting
 colorEngrave = svgwrite.rgb(255, 0, 0) # for engraving
 #color = colorEngrave
 width = "0.01mm" # production value
 width = "0.2mm" # testing value
 
-#dwg = svgwrite.Drawing('test.svg',size=("181mm","181mm"),viewBox="0 0 181 181")
+dwg = svgwrite.Drawing('test.svg',size=("181mm","181mm"),viewBox="0 0 181 181")
+path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
+wlEnds = wavyLine(path,(20,70),(160,70),capped1=False,capped2=False)
+vertexCircle(path,(160,70),[wlEnds])
+vertexCircle(path,(20,70),[wlEnds])
+sl1Ends = straightLineArrow(path,(20,100),(160,100),forward=False,capped1=False,capped2=False)
+vertexCircle(path,(160,100),[sl1Ends])
+vertexCircle(path,(20,100),[sl1Ends])
+sl2Ends = straightLineArrow(path,(20,125),(160,125),forward=True,capped1=False,capped2=False)
+vertexCircle(path,(160,125),[sl2Ends])
+vertexCircle(path,(20,125),[sl2Ends])
+sl3Ends = straightLine(path,(20,150),(160,150),capped1=False,capped2=False)
+vertexCircle(path,(160,150),[sl3Ends])
+vertexCircle(path,(20,150),[sl3Ends])
+spEnds =  spiralLine(path,(20,40),(160,40),capped1=False,capped2=False)
+vertexCircle(path,(160,40),[spEnds])
+vertexCircle(path,(20,40),[spEnds])
+dwg.add(path)
+dwg.save()
+
+### VBF 1 384x384
+#dwg = svgwrite.Drawing('VBF1.svg',size=("384mm","384mm"),viewBox="0 0 384 384")
 #path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
-#wlEnds = wavyLine(path,(20,70),(160,70),capped2=False)
-#vertexCircle(path,(165,70),[wlEnds])
-#sl1Ends = straightLineArrow(path,(20,100),(160,100),forward=False)
-#sl2Ends = straightLineArrow(path,(20,125),(160,125),forward=True,capped1=False)
-#vertexCircle(path,(15,125),[sl2Ends])
-#sl3Ends = straightLine(path,(20,150),(160,150),capped2=False)
-#vertexCircle(path,(165,150),[sl3Ends])
-#spEnds =  spiralLine(path,(20,40),(160,40))
+#q1 = (15,15)
+#q1p = (15,369)
+#q1B = (50,192)
+#q2 = (269,15)
+#q2p = (269,369)
+#q2B = (234,196)
+#BB = (142,192)
+#Hff = (142,290)
+#f1 = (92,369)
+#f2 = (192,369)
+#q1Ends = straightLineArrow(path,q1,q1B,forward=True,capped2=False)
+#q2Ends = straightLineArrow(path,q2,q2B,forward=True,capped2=False)
+#q1pEnds = straightLineArrow(path,q1p,q1B,forward=False,capped2=False)
+#q2pEnds = straightLineArrow(path,q2p,q2B,forward=False,capped2=False)
+#B1Ends = wavyLine(path,q1B,BB,capped1=False,capped2=False)
+#B2Ends = wavyLine(path,q2B,BB,capped1=False,capped2=False)
+#HEnds = straightLine(path,Hff,BB,capped1=False,capped2=False)
+#f1Ends = straightLineArrow(path,Hff,f1,forward=True,capped1=False)
+#f2Ends = straightLineArrow(path,Hff,f2,forward=True,capped1=False)
+#vertexCircle(path,q1B,[q1Ends,q1pEnds,B1Ends])
+#vertexCircle(path,q2B,[q2Ends,q2pEnds,B2Ends])
+#vertexCircle(path,BB,[HEnds,B1Ends,B2Ends])
+#vertexCircle(path,Hff,[HEnds,f1Ends,f2Ends])
 #dwg.add(path)
 #dwg.save()
 
-dwg = svgwrite.Drawing('test.svg',size=("181mm","181mm"),viewBox="0 0 181 181")
-path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
-sl1Ends = straightLineArrow(path,(10,160),(100,120),forward=False,capped2=False)
-sl2Ends = straightLineArrow(path,(100,120),(170,160),forward=False,capped1=False)
-wgEnds = wavyLine(path,(100,55),(100,120),capped1=False,capped2=False)
-vertexCircle(path,(100,120),[sl1Ends,sl2Ends,wgEnds])
-sp1Ends = wavyLine(path,(15,20),(100,55),capped2=False)
-sp2Ends = wavyLine(path,(165,15),(100,55),capped2=False)
-vertexCircle(path,(100,55),[sp1Ends,sp2Ends,wgEnds])
-dwg.add(path)
-dwg.save()
+
+## Vertex Tests
+#dwg = svgwrite.Drawing('test.svg',size=("181mm","181mm"),viewBox="0 0 181 181")
+#path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
+#wlEnds = wavyLine(path,(20,20),(160,20),capped1=False,capped2=False)
+#vertexCircle(path,(160,20),[wlEnds])
+#vertexCircle(path,(20,20),[wlEnds])
+#sl1Ends = straightLineArrow(path,(20,50),(20,170),forward=False,capped1=False,capped2=False)
+#vertexCircle(path,(20,170),[sl1Ends])
+#vertexCircle(path,(20,50),[sl1Ends])
+#sl0Ends = straightLineArrow(path,(40,70),(90,40),forward=True,capped1=False,capped2=False)
+#sl4Ends = straightLineArrow(path,(170,100),(90,40),forward=True,capped1=False,capped2=False)
+#vertexCircle(path,(40,70),[sl0Ends])
+#vertexCircle(path,(170,100),[sl4Ends])
+#vertexCircle(path,(90,40),[sl0Ends,sl4Ends])
+#sl5Ends = straightLineArrow(path,(90,120),(90,40),forward=True,capped1=False,capped2=False)
+#sl6Ends = straightLineArrow(path,(90,120),(40,120),forward=True,capped1=False,capped2=False)
+#sl7Ends = straightLineArrow(path,(90,120),(170,120),forward=True,capped1=False,capped2=False)
+#sl8Ends = straightLineArrow(path,(90,120),(90,170),forward=True,capped1=False,capped2=False)
+#vertexCircle(path,(90,120),[sl5Ends,sl6Ends,sl7Ends,sl8Ends])
+#dwg.add(path)
+#dwg.save()
+
+# Toward s-channel diagram
+#dwg = svgwrite.Drawing('test.svg',size=("384mm","384mm"),viewBox="0 0 384 384")
+#path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
+#sl1Ends = straightLineArrow(path,(10,160),(100,120),forward=False,capped2=False)
+#sl2Ends = straightLineArrow(path,(100,120),(170,160),forward=False,capped1=False)
+#wgEnds = wavyLine(path,(100,55),(100,120),capped1=False,capped2=False)
+#vertexCircle(path,(100,120),[sl1Ends,sl2Ends,wgEnds])
+#sp1Ends = spiralLine(path,(15,20),(100,55),capped2=False)
+#sp2Ends = spiralLine(path,(165,15),(100,55),capped2=False)
+#vertexCircle(path,(100,55),[sp1Ends,sp2Ends,wgEnds])
+#dwg.add(path)
+#dwg.save()
+
