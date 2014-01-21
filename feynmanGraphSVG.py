@@ -4,7 +4,8 @@ import numpy
 import svgwrite
 from math import sqrt,pi
 
-def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=25,period=50,width=20):
+def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=10.,period=30.0,width=5.0):
+  width *= 1.5
   p1 = numpy.array(p1,dtype=numpy.dtype(float))
   p2 = numpy.array(p2,dtype=numpy.dtype(float))
   propVec = p2-p1
@@ -60,7 +61,7 @@ def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=25,period=50,width=20):
   print "nExtra",nExtra
   return path
 
-def spiralLine(path,p1,p2,capped1=True,capped2=True,amp=60,period=50,width=10):
+def spiralLine(path,p1,p2,capped1=True,capped2=True,amp=25.0,period=25.0,width=5.0):
   p1 = numpy.array(p1,dtype=numpy.dtype(float))
   p2 = numpy.array(p2,dtype=numpy.dtype(float))
   propVec = p2-p1
@@ -111,7 +112,7 @@ def spiralLine(path,p1,p2,capped1=True,capped2=True,amp=60,period=50,width=10):
     path.push(['m']+list(normedPerpVec*width/4.))
   return path
 
-def straightLine(path,p1,p2,capped1=True,capped2=True,width=10):
+def straightLine(path,p1,p2,capped1=True,capped2=True,width=5.0):
   p1 = numpy.array(p1,dtype=numpy.dtype(float))
   p2 = numpy.array(p2,dtype=numpy.dtype(float))
   propVec = p2-p1
@@ -136,7 +137,7 @@ def straightLine(path,p1,p2,capped1=True,capped2=True,width=10):
     path.push(['m']+list(normedPerpVec*width/2.))
   return path
 
-def straightLineArrow(path,p1,p2,capped1=True,capped2=True,forward=True,width=10,arrowLength=30,arrowWidth=None):
+def straightLineArrow(path,p1,p2,capped1=True,capped2=True,forward=True,width=5.0,arrowLength=15.0,arrowWidth=None):
   if arrowWidth == None:
     arrowWidth = width
   p1 = numpy.array(p1,dtype=numpy.dtype(float))
@@ -177,14 +178,18 @@ def straightLineArrow(path,p1,p2,capped1=True,capped2=True,forward=True,width=10
     path.push(['m']+list(normedPerpVec*width/2.))
   return path
 
-color = svgwrite.rgb(0, 0, 255)
-width = "1mm"
+color = svgwrite.rgb(0, 0, 255) # for cutting
+colorEngrave = svgwrite.rgb(255, 0, 0) # for engraving
+#color = colorEngrave
+width = "0.01mm" # production value
+width = "0.2mm" # testing value
 
-dwg = svgwrite.Drawing('test.svg',size=("181mm","181mm"))
+dwg = svgwrite.Drawing('test.svg',size=("181mm","181mm"),viewBox="0 0 181 181")
 path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
-straightLineArrow(path,(100,100),(500,100),forward=True)
-wavyLine(path,(100,200),(500,200))
-straightLineArrow(path,(100,300),(500,300),forward=False)
-spiralLine(path,(100,400),(500,400))
+wavyLine(path,(10,70),(170,70))
+straightLineArrow(path,(10,100),(170,100),forward=False)
+straightLineArrow(path,(10,125),(170,125),forward=True)
+straightLine(path,(10,150),(170,150))
+spiralLine(path,(10,40),(170,40))
 dwg.add(path)
 dwg.save()
