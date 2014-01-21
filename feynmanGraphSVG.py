@@ -253,12 +253,12 @@ def vertexCircle(path,p1,endList,radius=5.):
     dataDict = {'first':firstPoint,'second':secondPoint,'firstAngle':firstAngle,'secondAngle':secondAngle,'crossesBoundary':crossesBoundary,'angleCenter':angleCenter}
     endsList.append(dataDict)
   endsList.sort(key=lambda x: x['angleCenter'])
-  print "******************"
-  print "circle coords: ",p1
-  for i,end in enumerate(endsList):
-    print i
-    print end
-  print "###################"
+  #print "******************"
+  #print "circle coords: ",p1
+  #for i,end in enumerate(endsList):
+  #  print i
+  #  print end
+  #print "###################"
   #path.push(['M']+list(p1))
   #path.push(['l']+[newRad,0.])
   #path.push(['M']+list(p1))
@@ -266,14 +266,14 @@ def vertexCircle(path,p1,endList,radius=5.):
   for i,end in enumerate(endsList):
     #if i != 0:
     #    continue
-    print list(endsList[i-1]['second'])
-    print list(end['first'])
+    #print list(endsList[i-1]['second'])
+    #print list(end['first'])
     path.push(['M']+list(endsList[i-1]['second']))
     advanceAngle = end['firstAngle'] - endsList[i-1]['secondAngle']
-    print end['firstAngle']*180/numpy.pi , endsList[i-1]['secondAngle']*180/numpy.pi
-    print advanceAngle*180/numpy.pi
+    #print end['firstAngle']*180/numpy.pi , endsList[i-1]['secondAngle']*180/numpy.pi
+    #print advanceAngle*180/numpy.pi
     isSame = endsList[i] is endsList[i-1]
-    print "isSame: ",isSame
+    #print "isSame: ",isSame
     sweepFlag = None
     largeArc = None
     if advanceAngle <= 0 and abs(advanceAngle) > numpy.pi:
@@ -297,7 +297,7 @@ def vertexCircle(path,p1,endList,radius=5.):
     elif advanceAngle > 0 and abs(advanceAngle) <= numpy.pi:
       sweepFlag = 1
       largeArc = 0
-    print sweepFlag,largeArc
+    #print sweepFlag,largeArc
     path.push(['A']+[newRad,newRad,0,largeArc,sweepFlag]+list(end['first']))
 
 #dwg = svgwrite.Drawing('test.svg',size=("181mm","181mm"),viewBox="0 0 181 181")
@@ -306,10 +306,26 @@ def vertexCircle(path,p1,endList,radius=5.):
 color = svgwrite.rgb(0, 0, 255) # for cutting
 colorEngrave = svgwrite.rgb(255, 0, 0) # for engraving
 #color = colorEngrave
+suffix = ""
+if color == colorEngrave:
+  suffix = "_engrave"
 width = "0.01mm" # production value
 width = "0.2mm" # testing value
 
-dwg = svgwrite.Drawing('test.svg',size=("181mm","181mm"),viewBox="0 0 181 181")
+## Test 1 w/o vertex
+dwg = svgwrite.Drawing('test1'+suffix+'.svg',size=("181mm","181mm"),viewBox="0 0 181 181")
+path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
+wlEnds = wavyLine(path,(10,70),(170,70),capped1=True,capped2=True)
+sl1Ends = straightLineArrow(path,(10,100),(170,100),forward=True,capped1=True,capped2=True)
+sl2Ends = straightLineArrow(path,(10,125),(170,125),forward=False,capped1=True,capped2=True)
+sl3Ends = straightLine(path,(10,150),(170,160),capped1=True,capped2=True)
+spEnds =  spiralLine(path,(10,40),(170,40),capped1=True,capped2=True)
+dwg.add(path)
+dwg.save()
+
+
+## Test 2 with vertex
+dwg = svgwrite.Drawing('test2'+suffix+'.svg',size=("181mm","181mm"),viewBox="0 0 181 181")
 path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
 wlEnds = wavyLine(path,(20,70),(160,70),capped1=False,capped2=False)
 vertexCircle(path,(160,70),[wlEnds])
@@ -320,43 +336,27 @@ vertexCircle(path,(20,100),[sl1Ends])
 sl2Ends = straightLineArrow(path,(20,125),(160,125),forward=True,capped1=False,capped2=False)
 vertexCircle(path,(160,125),[sl2Ends])
 vertexCircle(path,(20,125),[sl2Ends])
-sl3Ends = straightLine(path,(20,150),(160,150),capped1=False,capped2=False)
-vertexCircle(path,(160,150),[sl3Ends])
+sl3Ends = straightLine(path,(20,150),(160,160),capped1=False,capped2=False)
 vertexCircle(path,(20,150),[sl3Ends])
+vertexCircle(path,(160,160),[sl3Ends])
 spEnds =  spiralLine(path,(20,40),(160,40),capped1=False,capped2=False)
 vertexCircle(path,(160,40),[spEnds])
 vertexCircle(path,(20,40),[spEnds])
 dwg.add(path)
 dwg.save()
 
-### VBF 1 384x384
-#dwg = svgwrite.Drawing('VBF1.svg',size=("384mm","384mm"),viewBox="0 0 384 384")
-#path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
-#q1 = (15,15)
-#q1p = (15,369)
-#q1B = (50,192)
-#q2 = (269,15)
-#q2p = (269,369)
-#q2B = (234,196)
-#BB = (142,192)
-#Hff = (142,290)
-#f1 = (92,369)
-#f2 = (192,369)
-#q1Ends = straightLineArrow(path,q1,q1B,forward=True,capped2=False)
-#q2Ends = straightLineArrow(path,q2,q2B,forward=True,capped2=False)
-#q1pEnds = straightLineArrow(path,q1p,q1B,forward=False,capped2=False)
-#q2pEnds = straightLineArrow(path,q2p,q2B,forward=False,capped2=False)
-#B1Ends = wavyLine(path,q1B,BB,capped1=False,capped2=False)
-#B2Ends = wavyLine(path,q2B,BB,capped1=False,capped2=False)
-#HEnds = straightLine(path,Hff,BB,capped1=False,capped2=False)
-#f1Ends = straightLineArrow(path,Hff,f1,forward=True,capped1=False)
-#f2Ends = straightLineArrow(path,Hff,f2,forward=True,capped1=False)
-#vertexCircle(path,q1B,[q1Ends,q1pEnds,B1Ends])
-#vertexCircle(path,q2B,[q2Ends,q2pEnds,B2Ends])
-#vertexCircle(path,BB,[HEnds,B1Ends,B2Ends])
-#vertexCircle(path,Hff,[HEnds,f1Ends,f2Ends])
-#dwg.add(path)
-#dwg.save()
+## Test 3 Diagram
+dwg = svgwrite.Drawing('test3'+suffix+'.svg',size=("181mm","181mm"),viewBox="0 0 181 181")
+path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
+sl1Ends = straightLineArrow(path,(10,160),(100,120),forward=False,capped2=False)
+sl2Ends = straightLineArrow(path,(100,120),(170,160),forward=False,capped1=False)
+wgEnds = wavyLine(path,(100,55),(100,120),capped1=False,capped2=False)
+vertexCircle(path,(100,120),[sl1Ends,sl2Ends,wgEnds])
+sp1Ends = spiralLine(path,(15,20),(100,55),capped2=False)
+sp2Ends = spiralLine(path,(165,15),(100,55),capped2=False)
+vertexCircle(path,(100,55),[sp1Ends,sp2Ends,wgEnds])
+dwg.add(path)
+dwg.save()
 
 
 ## Vertex Tests
@@ -381,16 +381,64 @@ dwg.save()
 #dwg.add(path)
 #dwg.save()
 
-# Toward s-channel diagram
-#dwg = svgwrite.Drawing('test.svg',size=("384mm","384mm"),viewBox="0 0 384 384")
-#path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
-#sl1Ends = straightLineArrow(path,(10,160),(100,120),forward=False,capped2=False)
-#sl2Ends = straightLineArrow(path,(100,120),(170,160),forward=False,capped1=False)
-#wgEnds = wavyLine(path,(100,55),(100,120),capped1=False,capped2=False)
-#vertexCircle(path,(100,120),[sl1Ends,sl2Ends,wgEnds])
-#sp1Ends = spiralLine(path,(15,20),(100,55),capped2=False)
-#sp2Ends = spiralLine(path,(165,15),(100,55),capped2=False)
-#vertexCircle(path,(100,55),[sp1Ends,sp2Ends,wgEnds])
-#dwg.add(path)
-#dwg.save()
+## test4 Toward 2 2->2 Diagrams
+dwg = svgwrite.Drawing('test4.svg',size=("384mm","384mm"),viewBox="0 0 384 384")
+path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
+q1 = (10,10)
+q1p = (182,10)
+q1B = (96,364/3.+10)
+q2 = (10,374)
+q2p = (182,374)
+q2B = (96,2*364/3.+10)
+q1Ends = straightLineArrow(path,q1,q1B,forward=True,capped2=False)
+q1pEnds = straightLineArrow(path,q1p,q1B,forward=False,capped2=False)
+q2Ends = straightLineArrow(path,q2,q2B,forward=True,capped2=False)
+q2pEnds = straightLineArrow(path,q2p,q2B,forward=False,capped2=False)
+BEnds = wavyLine(path,q1B,q2B,capped1=False,capped2=False)
+vertexCircle(path,q1B,[q1Ends,q1pEnds,BEnds])
+vertexCircle(path,q2B,[q2Ends,q2pEnds,BEnds])
+q1 = numpy.array(q1)+numpy.array([192,0])
+q1p = numpy.array(q1p)+numpy.array([192,0])
+q1B = numpy.array(q1B)+numpy.array([192,0])
+q2 = numpy.array(q2)+numpy.array([192,0])
+q2p = numpy.array(q2p)+numpy.array([192,0])
+q2B = numpy.array(q2B)+numpy.array([192,0])
+q1Ends = spiralLine(path,q1,q1B,capped2=False)
+q1pEnds = straightLineArrow(path,q1p,q1B,forward=False,capped2=False)
+q2Ends = straightLineArrow(path,q2,q2B,forward=True,capped2=False)
+q2pEnds = spiralLine(path,q2p,q2B,capped2=False)
+BEnds = straightLineArrow(path,q1B,q2B,forward=False,capped1=False,capped2=False)
+vertexCircle(path,q1B,[q1Ends,q1pEnds,BEnds])
+vertexCircle(path,q2B,[q2Ends,q2pEnds,BEnds])
+dwg.add(path)
+dwg.save()
+
+## VBF 1 384x384
+dwg = svgwrite.Drawing('VBF1.svg',size=("384mm","384mm"),viewBox="0 0 384 384")
+path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
+q1 = (15,15)
+q1p = (15,369)
+q1B = (50,192)
+q2 = (269,15)
+q2p = (269,369)
+q2B = (234,196)
+BB = (142,192)
+Hff = (142,290)
+f1 = (92,369)
+f2 = (192,369)
+q1Ends = straightLineArrow(path,q1,q1B,forward=True,capped2=False)
+q2Ends = straightLineArrow(path,q2,q2B,forward=True,capped2=False)
+q1pEnds = straightLineArrow(path,q1p,q1B,forward=False,capped2=False)
+q2pEnds = straightLineArrow(path,q2p,q2B,forward=False,capped2=False)
+B1Ends = wavyLine(path,q1B,BB,capped1=False,capped2=False)
+B2Ends = wavyLine(path,q2B,BB,capped1=False,capped2=False)
+HEnds = straightLine(path,Hff,BB,capped1=False,capped2=False)
+f1Ends = straightLineArrow(path,Hff,f1,forward=True,capped1=False)
+f2Ends = straightLineArrow(path,Hff,f2,forward=True,capped1=False)
+vertexCircle(path,q1B,[q1Ends,q1pEnds,B1Ends])
+vertexCircle(path,q2B,[q2Ends,q2pEnds,B2Ends])
+vertexCircle(path,BB,[HEnds,B1Ends,B2Ends])
+vertexCircle(path,Hff,[HEnds,f1Ends,f2Ends])
+dwg.add(path)
+dwg.save()
 
