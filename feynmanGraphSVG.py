@@ -4,6 +4,15 @@ import numpy
 import svgwrite
 from math import sqrt,pi
 
+def subtractVertexDistance(p1,p2,width):
+  p1 = numpy.array(p1,dtype=numpy.dtype(float))
+  p2 = numpy.array(p2,dtype=numpy.dtype(float))
+  propVec = p2-p1
+  distance = sqrt(numpy.dot(propVec,propVec))
+  normedPropVec = propVec/distance
+  normedPerpVec = numpy.array([-normedPropVec[1],normedPropVec[0]])
+  return p1+width*normedPropVec,p2-width*normedPropVec
+
 def makeEndPoints(p1,p2,width):
   """
   Returns the points that a vertex should connect to as a pair of pairs of points.
@@ -17,7 +26,8 @@ def makeEndPoints(p1,p2,width):
   return (p1+normedPerpVec*width/2.,p1-normedPerpVec*width/2.),(p2+normedPerpVec*width/2.,p2-normedPerpVec*width/2.)
 
 def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=10.,period=30.0,width=5.0):
-  width *= 1.5
+  p1,p2 = subtractVertexDistance(p1,p2,width)
+  width2 = 1.5*width
   p1 = numpy.array(p1,dtype=numpy.dtype(float))
   p2 = numpy.array(p2,dtype=numpy.dtype(float))
   propVec = p2-p1
@@ -44,6 +54,7 @@ def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=10.,period=30.0,width=5.0)
     path.push(['l']+list(normedPerpVec*width/2.))
   else:
     path.push(['m']+list(normedPerpVec*width/2.))
+  path.push(['l']+list(normedPerpVec*(width2-width)/2.))
   for iOsc in range(nOsc):
     path.push(['q']+list(propVec+ampVec+quartWidthPropVec)+list(2*propVec+ampVec+2*quartWidthPropVec))
     path.push(['q']+list(propVec+quartWidthPropVec)+list(2*propVec-ampVec+2*quartWidthPropVec))
@@ -52,10 +63,12 @@ def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=10.,period=30.0,width=5.0)
     path.push(['q']+list(propVec)+list(2*propVec+ampVec))
   path.push(['l']+list(2*quartWidthPropVec))
   nExtra+=2
+  path.push(['l']+list(-normedPerpVec*(width2-width)/2.))
   if capped2:
     path.push(['l']+list(-normedPerpVec*width))
   else:
     path.push(['m']+list(-normedPerpVec*width))
+  path.push(['l']+list(-normedPerpVec*(width2-width)/2.))
   propVec *= -1
   ampVec *= -1
   for iOsc in range(nOsc):
@@ -66,6 +79,7 @@ def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=10.,period=30.0,width=5.0)
     path.push(['q']+list(propVec)+list(2*propVec+ampVec))
   path.push(['l']+list(-2*quartWidthPropVec))
   nExtra+=2
+  path.push(['l']+list(normedPerpVec*(width2-width)/2.))
   if capped1:
     path.push(['l']+list(normedPerpVec*width/2.))
   else:
@@ -74,6 +88,7 @@ def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=10.,period=30.0,width=5.0)
   return makeEndPoints(p1,p2,width)
 
 def spiralLine(path,p1,p2,capped1=True,capped2=True,amp=25.0,period=25.0,width=5.0):
+  p1,p2 = subtractVertexDistance(p1,p2,width)
   p1 = numpy.array(p1,dtype=numpy.dtype(float))
   p2 = numpy.array(p2,dtype=numpy.dtype(float))
   propVec = p2-p1
@@ -125,6 +140,7 @@ def spiralLine(path,p1,p2,capped1=True,capped2=True,amp=25.0,period=25.0,width=5
   return makeEndPoints(p1,p2,width)
 
 def straightLine(path,p1,p2,capped1=True,capped2=True,width=5.0):
+  p1,p2 = subtractVertexDistance(p1,p2,width)
   p1 = numpy.array(p1,dtype=numpy.dtype(float))
   p2 = numpy.array(p2,dtype=numpy.dtype(float))
   propVec = p2-p1
@@ -150,6 +166,7 @@ def straightLine(path,p1,p2,capped1=True,capped2=True,width=5.0):
   return makeEndPoints(p1,p2,width)
 
 def straightLineArrow(path,p1,p2,capped1=True,capped2=True,forward=True,width=5.0,arrowLength=15.0,arrowWidth=None):
+  p1,p2 = subtractVertexDistance(p1,p2,width)
   if arrowWidth == None:
     arrowWidth = width
   p1 = numpy.array(p1,dtype=numpy.dtype(float))
@@ -287,9 +304,12 @@ width = "0.2mm" # testing value
 
 dwg = svgwrite.Drawing('test.svg',size=("181mm","181mm"),viewBox="0 0 181 181")
 path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
-sl1Ends = straightLineArrow(path,(10,160),(100,160),forward=False,capped2=False)
-sl2Ends = straightLineArrow(path,(110,160),(170,160),forward=False,capped1=False)
-sl3Ends = straightLineArrow(path,(105,155),(105,50),forward=True,capped1=False)
-vertexCircle(path,(105,160),[sl1Ends,sl2Ends,sl3Ends])
+sl1Ends = straightLineArrow(path,(10,160),(100,120),forward=False,capped2=False)
+sl2Ends = straightLineArrow(path,(100,120),(170,160),forward=False,capped1=False)
+wgEnds = wavyLine(path,(100,55),(100,120),capped1=False,capped2=False)
+vertexCircle(path,(100,120),[sl1Ends,sl2Ends,wgEnds])
+sp1Ends = wavyLine(path,(15,20),(100,55),capped2=False)
+sp2Ends = wavyLine(path,(165,15),(100,55),capped2=False)
+vertexCircle(path,(100,55),[sp1Ends,sp2Ends,wgEnds])
 dwg.add(path)
 dwg.save()
