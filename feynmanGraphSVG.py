@@ -4,11 +4,11 @@ import numpy
 import svgwrite
 from math import sqrt,pi
 
-def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=5,period=50,width=10):
+def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=25,period=50,width=20):
   p1 = numpy.array(p1,dtype=numpy.dtype(float))
   p2 = numpy.array(p2,dtype=numpy.dtype(float))
   propVec = p2-p1
-  #print "fullPropVec: ",propVec
+  print "fullPropVec: ",propVec
   distance = sqrt(numpy.dot(propVec,propVec))
   nOsc = int(distance/period)
   period = distance/nOsc
@@ -16,23 +16,29 @@ def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=5,period=50,width=10):
   normedPerpVec = numpy.array([-normedPropVec[1],normedPropVec[0]])
   ampVec = amp*normedPerpVec
   propVec /= (nOsc*8)  # propVec is sopposed to be an 8th-wave
-  #print "propVec: ",propVec
-  #print "ampVec: ",ampVec
-  #print "normedPropVec",normedPropVec
-  #print "normedPerpVec",normedPerpVec
-  #print "distance: ",distance
-  #print "nOsc: ",nOsc
-  #print "period: ",period
+  propVec -= normedPropVec*(width/8. + width/16./nOsc)
+  print "propVec: ",propVec
+  print "ampVec: ",ampVec
+  print "normedPropVec",normedPropVec
+  print "normedPerpVec",normedPerpVec
+  print "distance: ",distance
+  print "nOsc: ",nOsc
+  print "period: ",period
+  nExtra = 0
+  quartWidthPropVec = 0.25*width*normedPropVec
   path.push(['M']+list(p1))
   if capped1:
     path.push(['l']+list(normedPerpVec*width/2.))
   else:
     path.push(['m']+list(normedPerpVec*width/2.))
   for iOsc in range(nOsc):
-    path.push(['q']+list(propVec+ampVec)+list(2*propVec+ampVec))
-    path.push(['q']+list(propVec)+list(2*propVec-ampVec))
+    path.push(['q']+list(propVec+ampVec+quartWidthPropVec)+list(2*propVec+ampVec+2*quartWidthPropVec))
+    path.push(['q']+list(propVec+quartWidthPropVec)+list(2*propVec-ampVec+2*quartWidthPropVec))
+    nExtra+=4
     path.push(['q']+list(propVec-ampVec)+list(2*propVec-ampVec))
     path.push(['q']+list(propVec)+list(2*propVec+ampVec))
+  path.push(['l']+list(2*quartWidthPropVec))
+  nExtra+=2
   if capped2:
     path.push(['l']+list(-normedPerpVec*width))
   else:
@@ -40,14 +46,18 @@ def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=5,period=50,width=10):
   propVec *= -1
   ampVec *= -1
   for iOsc in range(nOsc):
-    path.push(['q']+list(propVec+ampVec)+list(2*propVec+ampVec))
-    path.push(['q']+list(propVec)+list(2*propVec-ampVec))
+    path.push(['q']+list(propVec+ampVec-quartWidthPropVec)+list(2*propVec+ampVec-2*quartWidthPropVec))
+    path.push(['q']+list(propVec-quartWidthPropVec)+list(2*propVec-ampVec-2*quartWidthPropVec))
+    nExtra+=4
     path.push(['q']+list(propVec-ampVec)+list(2*propVec-ampVec))
     path.push(['q']+list(propVec)+list(2*propVec+ampVec))
+  path.push(['l']+list(-2*quartWidthPropVec))
+  nExtra+=2
   if capped1:
     path.push(['l']+list(normedPerpVec*width/2.))
   else:
     path.push(['m']+list(normedPerpVec*width/2.))
+  print "nExtra",nExtra
   return path
 
 def spiralLine(path,p1,p2,capped1=True,capped2=True,amp=60,period=50,width=10):
