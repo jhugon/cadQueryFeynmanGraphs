@@ -51,10 +51,9 @@ def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=10.,period=30.0,width=5.0)
   quartWidthPropVec = 0.25*width*normedPropVec
   path.push(['M']+list(p1))
   if capped1:
-    path.push(['l']+list(normedPerpVec*width/2.))
+    path.push(['l']+list(normedPerpVec*width2/2.))
   else:
-    path.push(['m']+list(normedPerpVec*width/2.))
-  path.push(['l']+list(normedPerpVec*(width2-width)/2.))
+    path.push(['m']+list(normedPerpVec*width2/2.))
   for iOsc in range(nOsc):
     path.push(['q']+list(propVec+ampVec+quartWidthPropVec)+list(2*propVec+ampVec+2*quartWidthPropVec))
     path.push(['q']+list(propVec+quartWidthPropVec)+list(2*propVec-ampVec+2*quartWidthPropVec))
@@ -63,12 +62,10 @@ def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=10.,period=30.0,width=5.0)
     path.push(['q']+list(propVec)+list(2*propVec+ampVec))
   path.push(['l']+list(2*quartWidthPropVec))
   nExtra+=2
-  path.push(['l']+list(-normedPerpVec*(width2-width)/2.))
   if capped2:
-    path.push(['l']+list(-normedPerpVec*width))
+    path.push(['l']+list(-normedPerpVec*width2))
   else:
-    path.push(['m']+list(-normedPerpVec*width))
-  path.push(['l']+list(-normedPerpVec*(width2-width)/2.))
+    path.push(['m']+list(-normedPerpVec*width2))
   propVec *= -1
   ampVec *= -1
   for iOsc in range(nOsc):
@@ -79,13 +76,12 @@ def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=10.,period=30.0,width=5.0)
     path.push(['q']+list(propVec)+list(2*propVec+ampVec))
   path.push(['l']+list(-2*quartWidthPropVec))
   nExtra+=2
-  path.push(['l']+list(normedPerpVec*(width2-width)/2.))
   if capped1:
-    path.push(['l']+list(normedPerpVec*width/2.))
+    path.push(['l']+list(normedPerpVec*width2/2.))
   else:
-    path.push(['m']+list(normedPerpVec*width/2.))
+    path.push(['m']+list(normedPerpVec*width2/2.))
   #print "nExtra",nExtra
-  return makeEndPoints(p1,p2,width)
+  return makeEndPoints(p1,p2,width2)
 
 def spiralLine(path,p1,p2,capped1=True,capped2=True,amp=25.0,period=25.0,width=5.0):
   p1,p2 = subtractVertexDistance(p1,p2,width)
@@ -209,18 +205,20 @@ def straightLineArrow(path,p1,p2,capped1=True,capped2=True,forward=True,width=5.
 def vertexCircle(path,p1,endList,radius=5.):
   p1 = numpy.array(p1,dtype=numpy.dtype(float))
   thisVertexEnds = []
+  radiusList = []
   for obj in endList:
     for end in obj:
-      tmpDist = -1.
+      otherPointNearVertex = False
       for point in end:
         propVec = p1-point
         distance = sqrt(numpy.dot(propVec,propVec))
-        if abs(distance-radius) < 1.:
-          if tmpDist > 0. and tmpDist -distance < 0.05:
+        if abs(distance-radius) < 1.5:
+          if otherPointNearVertex:
             thisVertexEnds.append(end)
-            newRad = distance
+            radiusList.append(distance)
           else:
-            tmpDist = distance
+            otherPointNearVertex = True
+  newRad = numpy.mean(radiusList)
   #print "nEnds: ",len(thisVertexEnds)
   endsList = []
   for end in thisVertexEnds:
@@ -359,37 +357,37 @@ dwg.add(path)
 dwg.save()
 
 
-## Vertex Tests
-#dwg = svgwrite.Drawing('test.svg',size=("181mm","181mm"),viewBox="0 0 181 181")
-#path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
-#wlEnds = wavyLine(path,(20,20),(160,20),capped1=False,capped2=False)
-#vertexCircle(path,(160,20),[wlEnds])
-#vertexCircle(path,(20,20),[wlEnds])
-#sl1Ends = straightLineArrow(path,(20,50),(20,170),forward=False,capped1=False,capped2=False)
-#vertexCircle(path,(20,170),[sl1Ends])
-#vertexCircle(path,(20,50),[sl1Ends])
-#sl0Ends = straightLineArrow(path,(40,70),(90,40),forward=True,capped1=False,capped2=False)
-#sl4Ends = straightLineArrow(path,(170,100),(90,40),forward=True,capped1=False,capped2=False)
-#vertexCircle(path,(40,70),[sl0Ends])
-#vertexCircle(path,(170,100),[sl4Ends])
-#vertexCircle(path,(90,40),[sl0Ends,sl4Ends])
-#sl5Ends = straightLineArrow(path,(90,120),(90,40),forward=True,capped1=False,capped2=False)
-#sl6Ends = straightLineArrow(path,(90,120),(40,120),forward=True,capped1=False,capped2=False)
-#sl7Ends = straightLineArrow(path,(90,120),(170,120),forward=True,capped1=False,capped2=False)
-#sl8Ends = straightLineArrow(path,(90,120),(90,170),forward=True,capped1=False,capped2=False)
-#vertexCircle(path,(90,120),[sl5Ends,sl6Ends,sl7Ends,sl8Ends])
-#dwg.add(path)
-#dwg.save()
+# Vertex Tests
+dwg = svgwrite.Drawing('testVertex.svg',size=("181mm","181mm"),viewBox="0 0 181 181")
+path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
+wlEnds = wavyLine(path,(20,20),(160,20),capped1=False,capped2=False)
+vertexCircle(path,(160,20),[wlEnds])
+vertexCircle(path,(20,20),[wlEnds])
+sl1Ends = straightLineArrow(path,(20,50),(20,170),forward=False,capped1=False,capped2=False)
+vertexCircle(path,(20,170),[sl1Ends])
+vertexCircle(path,(20,50),[sl1Ends])
+sl0Ends = straightLineArrow(path,(40,70),(90,40),forward=True,capped1=False,capped2=False)
+sl4Ends = straightLineArrow(path,(170,100),(90,40),forward=True,capped1=False,capped2=False)
+vertexCircle(path,(40,70),[sl0Ends])
+vertexCircle(path,(170,100),[sl4Ends])
+vertexCircle(path,(90,40),[sl0Ends,sl4Ends])
+sl5Ends = straightLineArrow(path,(90,120),(90,40),forward=True,capped1=False,capped2=False)
+sl6Ends = straightLineArrow(path,(90,120),(40,120),forward=True,capped1=False,capped2=False)
+sl7Ends = straightLineArrow(path,(90,120),(170,120),forward=True,capped1=False,capped2=False)
+sl8Ends = straightLineArrow(path,(90,120),(90,170),forward=True,capped1=False,capped2=False)
+vertexCircle(path,(90,120),[sl5Ends,sl6Ends,sl7Ends,sl8Ends])
+dwg.add(path)
+dwg.save()
 
 ## test4 Toward 2 2->2 Diagrams
 dwg = svgwrite.Drawing('test4.svg',size=("384mm","384mm"),viewBox="0 0 384 384")
 path = dwg.path(None,stroke=color,stroke_width=width,fill="none")
 q1 = (10,10)
 q1p = (182,10)
-q1B = (96,364/3.+10)
-q2 = (10,374)
-q2p = (182,374)
-q2B = (96,2*364/3.+10)
+q1B = (96,268/3.+10)
+q2 = (10,278)
+q2p = (182,278)
+q2B = (96,2*268/3.+10)
 q1Ends = straightLineArrow(path,q1,q1B,forward=True,capped2=False)
 q1pEnds = straightLineArrow(path,q1p,q1B,forward=False,capped2=False)
 q2Ends = straightLineArrow(path,q2,q2B,forward=True,capped2=False)
