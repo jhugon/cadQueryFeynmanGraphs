@@ -83,7 +83,10 @@ def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=10.,period=30.0,width=5.0)
   #print "nExtra",nExtra
   return makeEndPoints(p1,p2,width2)
 
-def spiralLine(path,p1,p2,capped1=True,capped2=True,amp=25.0,period=25.0,width=5.0):
+def spiralLine(path,p1,p2,capped1=True,capped2=True,amp=23.0,period=23.0,width=5.):
+  width2 = width
+  widthSF = 0.97
+  width = widthSF*width2
   p1,p2 = subtractVertexDistance(p1,p2,width)
   p1 = numpy.array(p1,dtype=numpy.dtype(float))
   p2 = numpy.array(p2,dtype=numpy.dtype(float))
@@ -106,33 +109,32 @@ def spiralLine(path,p1,p2,capped1=True,capped2=True,amp=25.0,period=25.0,width=5
   #print "period: ",period
   path.push(['M']+list(p1))
   if capped1:
-    path.push(['l']+list(normedPerpVec*width/2.))
+    path.push(['l']+list(normedPerpVec*width2/2.))
   else:
-    path.push(['m']+list(normedPerpVec*width/2.))
+    path.push(['m']+list(normedPerpVec*width2/2.))
   for iCrossings in range(nLoops):
-    path.push(['q']+list(propVec/2+ampVec/4.)+list(propVec))
+    path.push(['q']+list(0.25*propVec)+list(0.5*propVec-0.2*ampVec))
+    path.push(['q']+list(0.25*propVec+0.2*ampVec)+list(0.5*propVec+0.2*ampVec))
   if capped2:
-    path.push(['l']+list(-normedPerpVec*width))
+    path.push(['l']+list(-normedPerpVec*width2))
   else:
-    path.push(['m']+list(-normedPerpVec*width))
+    path.push(['m']+list(-normedPerpVec*width2))
   propVec *= -1
-  path.push(['l']+list(-(width)*normedPropVec))
   for iCrossings in range(nLoops):
-    path.push(['q']+list(-0.5*(loopDistance-2*width)*normedPropVec+ampVec/4.)+list(-(loopDistance-2*width)*normedPropVec))
-    if iCrossings != nLoops-1:
-      path.push(['c']+list(2*normedPropVec*width-0.5*ampVec)+list(2*normedPropVec*width-ampVec)+list(-normedPropVec*width-ampVec))
-      path.push(['c']+list(-3*normedPropVec*width)+list(-3*normedPropVec*width+0.5*ampVec)+list(-normedPropVec*width+ampVec))
-      path.push(['m']+list(normedPropVec*width-normedPerpVec*width))
-      path.push(['c']+list(2*normedPropVec*width-0.5*((amp-2*width)*normedPerpVec))+list(normedPropVec*width-((amp-2*width)*normedPerpVec))+list(-(amp-2*width)*normedPerpVec))
-      path.push(['m']+list((amp-2*width)*normedPerpVec))
-      path.push(['c']+list(-2*normedPropVec*width-0.5*((amp-2*width)*normedPerpVec))+list(-normedPropVec*width-((amp-2*width)*normedPerpVec))+list(-(amp-2*width)*normedPerpVec))
-      path.push(['m']+list(-normedPropVec*width+normedPerpVec*width+(amp-2*width)*normedPerpVec))
-  path.push(['l']+list(-width*normedPropVec))
+    path.push(['q']+list(-0.25*(loopDistance-2*width)*normedPropVec)+list(-0.5*(loopDistance-2*width)*normedPropVec-0.16*ampVec))
+    path.push(['c']+list(2*normedPropVec*width-0.5*ampVec)+list(2*normedPropVec*width-ampVec)+list(-normedPropVec*width-ampVec))
+    path.push(['c']+list(-3*normedPropVec*width)+list(-3*normedPropVec*width+0.5*ampVec)+list(-normedPropVec*width+ampVec))
+    path.push(['m']+list(normedPropVec*width-normedPerpVec*width))
+    path.push(['c']+list(2*normedPropVec*width-0.5*((amp-2*width)*normedPerpVec))+list(normedPropVec*width-((amp-2*width)*normedPerpVec))+list(-(amp-2*width)*normedPerpVec))
+    path.push(['m']+list((amp-2*width)*normedPerpVec))
+    path.push(['c']+list(-2*normedPropVec*width-0.5*((amp-2*width)*normedPerpVec))+list(-normedPropVec*width-((amp-2*width)*normedPerpVec))+list(-(amp-2*width)*normedPerpVec))
+    path.push(['m']+list(-normedPropVec*width+normedPerpVec*width+(amp-2*width)*normedPerpVec))
+    path.push(['q']+list(-0.25*(loopDistance-2*width)*normedPropVec+0.16*ampVec)+list(-0.5*(loopDistance-2*width)*normedPropVec+0.16*ampVec))
   if capped1:
-    path.push(['l']+list(normedPerpVec*width/2.))
+    path.push(['l']+list(normedPerpVec*width2/2.))
   else:
-    path.push(['m']+list(normedPerpVec*width/2.))
-  return makeEndPoints(p1,p2,width)
+    path.push(['m']+list(normedPerpVec*width2/2.))
+  return makeEndPoints(p1,p2,width2)
 
 def straightLine(path,p1,p2,capped1=True,capped2=True,width=5.0):
   p1,p2 = subtractVertexDistance(p1,p2,width)
