@@ -13,6 +13,14 @@ def subtractVertexDistance(p1,p2,width):
   normedPerpVec = numpy.array([-normedPropVec[1],normedPropVec[0]])
   return p1+width*normedPropVec,p2-width*normedPropVec
 
+def rotate(p1,angle):
+  p1 = numpy.array(p1,dtype=numpy.dtype(float))
+  angle *= numpy.pi/180.
+  rotMatrix = numpy.array([[numpy.cos(angle), -numpy.sin(angle)], 
+                   [numpy.sin(angle),  numpy.cos(angle)]])
+  result =  rotMatrix.dot(p1)
+  return result
+
 def makeEndPoints(p1,p2,width):
   """
   Returns the points that a vertex should connect to as a pair of pairs of points.
@@ -501,6 +509,24 @@ f2Ends = straightLineArrow(path,Hff,f2,forward=True,capped1=False)
 vertexCircle(path,tri1,[sl3Ends,sl5Ends,g1Ends])
 vertexCircle(path,tri2,[sl3Ends,sl4Ends,g2Ends])
 vertexCircle(path,tri3,[sl4Ends,sl5Ends,HEnds])
+vertexCircle(path,Hff,[HEnds,f1Ends,f2Ends])
+q1 = (320,5)
+q1p = (320,125)
+q1B = (255,60)
+BH = numpy.array((170.,60.))
+B2 = rotate(numpy.array((0.,-80.)),-45.)+BH
+Hff = rotate(numpy.array((0.,60.)),45.)+BH
+f1 = rotate(numpy.array((60.,70.)),45.)+Hff
+f2 = rotate(numpy.array((-60.,70.)),45.)+Hff
+q1Ends = straightLineArrow(path,q1,q1B,forward=True,capped2=False)
+q1pEnds = straightLineArrow(path,q1p,q1B,forward=True,capped2=False)
+BEnds = wavyLine(path,q1B,BH,capped1=False,capped2=False)
+B2Ends = wavyLine(path,BH,B2,capped1=False,capped2=True)
+HEnds = straightLine(path,BH,Hff,capped1=False,capped2=False)
+f1Ends = straightLineArrow(path,Hff,f1,forward=False,capped1=False)
+f2Ends = straightLineArrow(path,Hff,f2,forward=True,capped1=False)
+vertexCircle(path,q1B,[q1Ends,q1pEnds,BEnds])
+vertexCircle(path,BH,[HEnds,BEnds,B2Ends])
 vertexCircle(path,Hff,[HEnds,f1Ends,f2Ends])
 dwg.add(path)
 dwg.save()
