@@ -25,7 +25,7 @@ def makeEndPoints(p1,p2,width):
   normedPerpVec = numpy.array([-normedPropVec[1],normedPropVec[0]])
   return (p1+normedPerpVec*width/2.,p1-normedPerpVec*width/2.),(p2+normedPerpVec*width/2.,p2-normedPerpVec*width/2.)
 
-def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=10.,period=30.0,width=5.0):
+def wavyLine(path,p1,p2,capped1=True,capped2=True,amp=7.,period=23.0,width=5.0):
   p1,p2 = subtractVertexDistance(p1,p2,width)
   width2 = 1.5*width
   p1 = numpy.array(p1,dtype=numpy.dtype(float))
