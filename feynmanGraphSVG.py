@@ -605,11 +605,6 @@ g2 = (252,385)
 Hvv = numpy.array((192,160))
 v1 = numpy.array((137,92))
 v2 = numpy.array((247,92))
-print v1-Hvv,v2-Hvv
-#f1 = v1+0.5*(v1-Hvv)+0.4*(v2-Hvv)
-#f2 = v1+0.5*(v1-Hvv)-0.4*(v2-Hvv)
-#f3 = v2+0.6*(v2-Hvv)-0.3*(v1-Hvv)
-#f4 = v2+0.6*(v2-Hvv)+0.3*(v1-Hvv)
 f1 = v1+numpy.array((-89,-25))
 f2 = v1+numpy.array((-7,-92))
 f3 = v2+numpy.array((7,-92))
@@ -632,5 +627,27 @@ vertexCircle(path,tri3,[sl4Ends,sl5Ends,HEnds])
 vertexCircle(path,Hvv,[HEnds,v1Ends,v2Ends])
 vertexCircle(path,v1,[v1Ends,f1Ends,f2Ends])
 vertexCircle(path,v2,[v2Ends,f3Ends,f4Ends])
+# gg->gam gam Box diagram
+goVec = numpy.array((0,-97))
+g1 = numpy.array((270,385))
+g2 = g1+numpy.array((97,0))
+box1 = g1+goVec
+box2 = g2+goVec
+box3 = box1+goVec
+box4 = box2+goVec
+B1 = box3+goVec
+B2 = box4+goVec
+sl1Ends = straightLineArrow(path,box2,box1,forward=False,capped1=False,capped2=False)
+sl2Ends = straightLineArrow(path,box1,box3,forward=False,capped1=False,capped2=False)
+sl3Ends = straightLineArrow(path,box3,box4,forward=False,capped1=False,capped2=False)
+sl4Ends = straightLineArrow(path,box4,box2,forward=False,capped1=False,capped2=False)
+g1Ends = spiralLine(path,box1,g1,capped1=False)
+g2Ends = spiralLine(path,g2,box2,capped2=False)
+B1Ends = wavyLine(path,box3,B1,capped1=False,capped2=True)
+B2Ends = wavyLine(path,box4,B2,capped1=False,capped2=True)
+vertexCircle(path,box1,[sl1Ends,sl2Ends,g1Ends])
+vertexCircle(path,box2,[sl1Ends,sl4Ends,g2Ends])
+vertexCircle(path,box3,[sl2Ends,sl3Ends,B1Ends])
+vertexCircle(path,box4,[sl3Ends,sl4Ends,B2Ends])
 dwg.add(path)
 dwg.save()
